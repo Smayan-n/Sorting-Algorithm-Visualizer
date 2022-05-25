@@ -24,12 +24,12 @@ const mergeSort = (array) => {
     const mid = Math.floor(array.length / 2);
 
     let left = array.slice(0, mid);
-    left = mergeSort(left, [0, Math.floor(numbers.length / 2)]);
+    left = mergeSort(left);
 
     let right = array.slice(mid, array.length);
-    right = mergeSort(right, [Math.floor(numbers.length / 2), numbers.length - 1]);
+    right = mergeSort(right);
 
-    return mergeArrays(left, right, []);
+    return mergeArrays(left, right);
 
 }
 //helper merge method for mergeSort
@@ -111,6 +111,28 @@ const bubbleSort = () =>{
             else{
                 moves.push([j, j + 1, false]);
             }
+        }
+    }
+    return moves;
+}
+
+const insertionSort = () =>{
+    //arr to store all the moves
+    let moves = [];
+
+    for(let i = 1; i < numbers.length; i++){
+        for(let j = i; j > 0; j--){
+            if(numbers[j] < numbers[j - 1]){
+                //swap
+                const temp = numbers[j];
+                numbers[j] = numbers[j - 1];
+                numbers[j - 1] = temp;
+                moves.push([j, j - 1, true]);
+            }
+            else{
+                moves.push([j, j - 1, false]);
+            }
+
         }
     }
     return moves;
@@ -245,14 +267,16 @@ const renderBarStyle = (bars, bgColor, zInd, posLeft) =>{
 //after page is fully loaded
 $(document).ready(function(){
                 //min, max, length
-    populateArray(1, 40, 10);
+    populateArray(1, 40, 5);
     renderArray();
 
     //when swap button is pressed
-    $("#swap-button").off().on("click", function(){
+    $("#sort-button").off().on("click", function(){
         //get main container and its children - using vanialla js because jquery .children() is not working
-        let container = document.getElementById('main-container');
-        let children = container.children;      
+        const container = document.getElementById('main-container');
+        const children = container.children;    
+        
+        const c = list(children);
 
         const moves = bubbleSort();
         //animation time

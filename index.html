@@ -9,7 +9,7 @@
 
     <link rel="stylesheet" href="styles/mainContainer.css">
     <link rel="stylesheet" href="styles/general.css">
-
+    <link rel="stylesheet" href="styles/header.css">
 
     <!--scripts-->
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
@@ -17,8 +17,33 @@
 
 </head>
 <body>
+    <div id="header">
+        <div class="left-section">
+
+        </div>
+
+        <div class="right-section">
+            <div class="sorting-methods-container">
+                <input type="checkbox" id="bubb">
+                <label for="bubb">Bubble Sort</label>
+
+                <input type="checkbox" id="sel">
+                <label for="sel">Slection Sort</label>
+
+                <input type="checkbox" id="inser">
+                <label for="inser">Insertion Sort</label>
+
+                <input type="checkbox" id="merge">
+                <label for="merge">Merge Sort</label>
+                
+            </div>
+            <div class="sort-button-container">
+                <button id="sort-button">Sort</button>
+            </div>
+        </div>
+
+    </div>
     
-    <button id="swap-button">Swap</button>
     
     <div id="main-container">
     </div>
