@@ -11,23 +11,67 @@ const populateArray = (min, max, length) =>{
     }
 }
 
-//removes all swaps with no change (same index)
-const removeDuplicates = swaps =>{
-    swaps = swaps.filter(swap =>{
-        if(swap[0] === swap[1]){
-            return false;
+//recursive merge sort
+let mov = [];
+const mergeSort = (array) => {
+
+    //base case
+    if(array.length <= 1){
+        return array;
+    }
+    //recusrive case
+
+    const mid = Math.floor(array.length / 2);
+
+    let left = array.slice(0, mid);
+    left = mergeSort(left, [0, Math.floor(numbers.length / 2)]);
+
+    let right = array.slice(mid, array.length);
+    right = mergeSort(right, [Math.floor(numbers.length / 2), numbers.length - 1]);
+
+    return mergeArrays(left, right, []);
+
+}
+//helper merge method for mergeSort
+const mergeArrays = (arr1, arr2) => {
+    const merged = [];
+    let i1 = 0;
+    let i2 = 0;
+
+    while(true){
+        if(arr1[i1] < arr2[i2]){
+            merged.push(arr1[i1]);
+            i1++;
+
+            if(i1 == arr1.length){
+                for(let i = i2; i < arr2.length; i++){
+                    merged.push(arr2[i]);
+                }
+                break;
+            }
         }
         else{
-            return true;
-        }
-    });
-    return swaps;
-} 
+            merged.push(arr2[i2]);
+            i2++;
+
+            if(i2 == arr2.length){
+                for(let i = i1; i < arr1.length; i++){
+                    merged.push(arr1[i]);
+                }
+                break;
+            }
+        }     
+        
+    }
+    console.log(merged);
+    return merged;
+}
+
 
 //selection sort algortihm
 const selectionSort = () =>{
-    //arr to store all the swaps
-    let swaps = [];
+    //arr to store all the moves
+    let moves = [];
 
     for(let i = 0; i < numbers.length; i++){
         let minIndex = i;
@@ -35,37 +79,41 @@ const selectionSort = () =>{
             if(numbers[j] < numbers[minIndex]){
                 minIndex = j;
             }
+            moves.push([i, j, false]);
+            
         }
         //swapping nodes as well
         //using var because it can be re-declared
         const temp = numbers[i];
         numbers[i] = numbers[minIndex];
         numbers[minIndex] = temp;
-        swaps.push([i, minIndex]);
+        moves.push([i, minIndex, true]);
 
+        
     }   
-    return swaps;
+    return moves;
 }
 
 
 const bubbleSort = () =>{
-    let swaps = [];
+    //arr to store all the moves
     let moves = [];
 
     for(let i = 0; i < numbers.length; i++){
         for(let j = 0; j < numbers.length - i; j++){
-            moves.push([j, j + 1]);
             if(numbers[j] > numbers[j + 1]){
                 //swap
                 const temp = numbers[j + 1];
                 numbers[j + 1] = numbers[j];
                 numbers[j] = temp;
-                swaps.push([j, j + 1]);
-
+                moves.push([j, j + 1, true]);
+            }
+            else{
+                moves.push([j, j + 1, false]);
             }
         }
     }
-    return [swaps, moves];
+    return moves;
 }
 
 //VIEW
@@ -93,100 +141,62 @@ const renderArray = () =>{
     });
 }
 
-//swaps to bars in container
-const swapBars1 = (bar1, bar2, animationTime) =>{
-
-    //converting html elements to jquery objects
-    bar1 = $(bar1);
-    bar2 = $(bar2);
-
-    //temproprary element (right sibling of bar1)
-    const sibling = bar1.next().is(bar2) ? bar1 : bar1.next();
-
-    //swap bars and animate them---->
-    //setting css properties before animation
-
-    bar1.css({
-        zIndex: '100',
-        backgroundColor: 'red'
-    });
-    bar2.css({
-        zIndex: '100',
-        backgroundColor: 'red'
-    });
-
-    const diff = (bar1.index() - bar2.index());
-    //animation for swapping
-    setTimeout(() =>{
-        bar1.animate({left: '-=' + (diff * 22) + 'px'}, animationTime, () =>{
-            bar1.insertBefore(bar2);
-            bar1.css({
-                left: '0',
-                zIndex: '0',
-                backgroundColor: 'green',
-            });
-        });
-        bar2.animate({left: '+=' + (diff * 22) + 'px'}, animationTime, () =>{
-            bar2.insertBefore(sibling);
-            bar2.css({
-                left: '0',
-                zIndex: '0',
-                backgroundColor: 'green',
-            });
-        });
-
-        // bar1.insertBefore(bar2);
-        // bar1.css({
-        //             left: '0',
-        //             zIndex: '0',
-        //             backgroundColor: 'green',
-        //         });
-        // bar2.insertBefore(sibling);
-        // bar2.css({
-        //             left: '0',
-        //             zIndex: '0',
-        //             backgroundColor: 'green',
-        // });
-
-
-    }, animationTime);
-
-}
-
+/*NOTE: the moves array stores all the scans and swaps done on the 
+numbers array while sorting.
+the third element in each of the moves is a bool that states if that move is a swap or a scan
+true: swap, false: scan
+*/
 //handles rendering of sorting - recursive
-const renderSort = (index, swaps, bars, animationTime) =>{
+const renderSort = async (index, moves, bars, animationTime) =>{
 
-    if(index >= swaps.length){
+    //base case
+    if(index >= moves.length){
         return;
     }
 
+    //recursive case
+
     //getting bars from index values out of moves
-    let bar1 = bars[swaps[index][0] + 1];
-    let bar2 = bars[swaps[index][1] + 1];
+    let bar1 = bars[moves[index][0]];
+    let bar2 = bars[moves[index][1]];
     //converting html elements to jquery objects
     bar1 = $(bar1);
     bar2 = $(bar2);
 
-    //setting css properties before animation
-    renderBarStyle([bar1, bar2], "red", "100", "0px");
+    //if true, swap
+    if(moves[index][2]){
+        //setting css properties before animation
+        renderBarStyle([bar1, bar2], "red", "0", "0px");
+        //using async/await and timeout functions to achieve delay
+        setTimeout(async () => {
+            renderBarStyle([bar1, bar2], "aqua", "0", "0px");
 
-    //after a certain time other code is run
-    //if(moves[index][0] === moves[index][0])
-    setTimeout(() =>{
-        //evauating promise - it waits for swapBars() to be executed before continuing
-        swapBars(bar1, bar2, animationTime).then(
-            (result) => {
+            setTimeout(async () => {
+                //awaiting animation to be over
+                await swapBars(bar1, bar2, animationTime);
+
                 setTimeout(() =>{
                     renderBarStyle([bar1, bar2], "green", "0", "0px");
                     //recurse    
-                    renderSort(index + 1, swaps, bars, animationTime, swapBars);
-                }, animationTime);   
-            }
-        );
+                    renderSort(index + 1, moves, bars, animationTime);
 
-    }, animationTime);
-    
+                }, animationTime);
 
+            }, animationTime);
+
+        }, animationTime);
+        
+        
+    }
+    //if false, scan
+    else{
+        renderBarStyle([bar1, bar2], "red", "0", "0px");
+        setTimeout(() =>{
+            renderBarStyle([bar1, bar2], "green", "0", "0px");
+            //recurse
+            renderSort(index + 1, moves, bars, animationTime);
+        }, animationTime);
+    }
 }
 
 //swaps two bars
@@ -235,38 +245,19 @@ const renderBarStyle = (bars, bgColor, zInd, posLeft) =>{
 //after page is fully loaded
 $(document).ready(function(){
                 //min, max, length
-    populateArray(1, 40, 50);
+    populateArray(1, 40, 10);
     renderArray();
-
 
     //when swap button is pressed
     $("#swap-button").off().on("click", function(){
         //get main container and its children - using vanialla js because jquery .children() is not working
         let container = document.getElementById('main-container');
-        let children = container.childNodes;        
-        
-        //sort
-        const [swaps, moves] = bubbleSort();
+        let children = container.children;      
+
+        const moves = bubbleSort();
         //animation time
-        const animationTime = 1;
-
-        renderSort(0, swaps, children, animationTime);
-
-
-        // //display swaps
-        // let index = 0;
-        // const interval = setInterval(() => {
-        //     const c1 = children[swaps[index][0] + 1];
-        //     const c2 = children[swaps[index][1] + 1];
-        //     swapBars(c1, c2, animationTime);//render function
-        //     index++;
-        //     children = container.childNodes;//updating children everytime they are swapped
-
-        //     if(index >= swaps.length){
-        //         clearInterval(interval);
-        //     }
-        // }, animationTime * 5);
-
+        const animationTime = 100;
+        renderSort(0, moves, children, animationTime);
 
     });
 
