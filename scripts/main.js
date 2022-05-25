@@ -1,15 +1,21 @@
 //MODEL
 
 //numbers array
-const numbers = []
+let numbers = [];
+let keyLinks = [];
 
 //populates array with random numbers in range
 const populateArray = (min, max, length) =>{
+    //first reset arrays
+    numbers = [];
+    keyLinks = [];
     for(let i = 0; i < length; i++){
         const rand = Math.floor(Math.random() * (max - min + 1) + min);
         numbers.push(rand);
+        keyLinks.push(i);
     }
 }
+
 
 //recursive merge sort
 let mov = [];
@@ -89,7 +95,7 @@ const selectionSort = () =>{
         numbers[minIndex] = temp;
         moves.push([i, minIndex, true]);
 
-        
+        swapKeyLinks(i, minIndex);        
     }   
     return moves;
 }
@@ -107,6 +113,9 @@ const bubbleSort = () =>{
                 numbers[j + 1] = numbers[j];
                 numbers[j] = temp;
                 moves.push([j, j + 1, true]);
+
+                swapKeyLinks(j + 1, j);
+
             }
             else{
                 moves.push([j, j + 1, false]);
@@ -128,6 +137,8 @@ const insertionSort = () =>{
                 numbers[j] = numbers[j - 1];
                 numbers[j - 1] = temp;
                 moves.push([j, j - 1, true]);
+
+                swapKeyLinks(j, j - 1);
             }
             else{
                 moves.push([j, j - 1, false]);
@@ -138,19 +149,30 @@ const insertionSort = () =>{
     return moves;
 }
 
+//swaps keyLinks
+const swapKeyLinks = (i, j) =>{
+    const temp = keyLinks[i];
+    keyLinks[i] = keyLinks[j];
+    keyLinks[j] = temp;
+}
+
 //VIEW
 
 //redners array to be displayed
 const renderArray = () =>{
 
-    //height multiplier for the bars
-    const heightMultiplier = 10;
+    //first clear the container
+    $("#main-container").empty();
 
-    //loops through all numbers in array and display's it in container
-    numbers.forEach(num =>{
+    //height multiplier for the bars
+    const heightMultiplier = 4;
+    const size = numbers.length;
+
+    //loops through all numbers in array and display's it in the container
+    numbers.forEach((num, index) =>{
     
         const markup = `
-            <div class="bar">${num}<div>
+            <div class="bar" id="${index}">${size < 25 ? num : ''}<div>
         `;
 
         //add bar to container
@@ -159,6 +181,23 @@ const renderArray = () =>{
 
         //style bar
         bar.css("height", "" + num * heightMultiplier + "px");
+    
+    setBarWidth(size);
+
+    });
+}
+
+const setBarWidth = size => {
+    let barWidth = Math.floor(700 / size);
+    $(".bar").css("width", "" + barWidth + "px");
+}
+
+//sets a different color in bars that are in their final position (sorted)
+const renderFinalColor = (bars) =>{
+    keyLinks.forEach((keyLink, i) => {
+        if(bars[i].id === ''+ keyLink){
+            renderBarStyle([bars[i]], "purple");
+        }
 
     });
 }
@@ -170,6 +209,8 @@ true: swap, false: scan
 */
 //handles rendering of sorting - recursive
 const renderSort = async (index, moves, bars, animationTime) =>{
+
+    renderFinalColor(bars);
 
     //base case
     if(index >= moves.length){
@@ -233,12 +274,12 @@ const swapBars = (bar1, bar2, animationTime) =>{
         //swap bars and animate them---->
         const diff = (bar1.index() - bar2.index());
 
-        bar1.animate({left: '-=' + (diff * 22) + 'px'}, animationTime, () =>{
+        bar1.animate({left: '-=' + (diff * bar1.outerWidth()) + 'px'}, animationTime, () =>{
             bar1.insertBefore(bar2);
             renderBarStyle([bar1], "red", "0", "0px");
         });
 
-        bar2.animate({left: '+=' + (diff * 22) + 'px'}, animationTime, () =>{
+        bar2.animate({left: '+=' + (diff * bar2.outerWidth()) + 'px'}, animationTime, () =>{
             bar2.insertBefore(sibling);
             renderBarStyle([bar2], "red", "0", "0px"); 
 
@@ -261,28 +302,84 @@ const renderBarStyle = (bars, bgColor, zInd, posLeft) =>{
     });
 }
 
-
 //CONTROLLER
 
 //after page is fully loaded
 $(document).ready(function(){
-                //min, max, length
-    populateArray(1, 40, 5);
+    //min, max, length - default generation
+    const min = 5;
+    const max = 130;
+    populateArray(min, max, 10);
     renderArray();
 
     //when swap button is pressed
     $("#sort-button").off().on("click", function(){
+
+        //disable all other inputs
+        toggleInputs(true);
+        
+        //getting type of algorithm 
+        let moves = [];
+        if(algorithm !== null){
+            if(algorithm === "bubble-sort-button")  moves = bubbleSort();
+            else if(algorithm === "selection-sort-button")  moves = selectionSort();
+            else if(algorithm === "insertion-sort-button")  moves = insertionSort();
+        }
+        else{
+            alert("pick an algorithm");
+            return;
+        }
+
         //get main container and its children - using vanialla js because jquery .children() is not working
         const container = document.getElementById('main-container');
         const children = container.children;    
-        
-        const c = list(children);
 
-        const moves = bubbleSort();
+        console.log(keyLinks);
+
         //animation time
-        const animationTime = 100;
+        const arrSize = numbers.length;
+        //if arr size is high, animationtime is low
+        const animationTime = Math.floor(1000 / arrSize);
+        //render sort
         renderSort(0, moves, children, animationTime);
 
     });
 
+    //function handles the selection of algorithm type
+    let algorithm = null;
+    $("div.alg-select-button").click(function(){
+        //toggles class so the button clicked can be styled
+        $("div.alg-select-button-active").removeClass("alg-select-button-active");
+        $(this).toggleClass("alg-select-button-active");
+        //getting id of selected element
+        algorithm = $(this).attr("id");
+    });
+
+    //array size input handler - fired when input is changed
+    $("#array-size-input").on("input change", function(){
+        //everytime the input is changed, a new array is generated
+        const size = parseInt($(this).val());
+        populateArray(min, max, size);
+        renderArray();
+        
+    });
+
+    //generate arr button handler
+    $("#generate-arr-button").click(function(){
+        const size = parseInt($("#array-size-input").val());
+        populateArray(min, max, size);
+        renderArray();
+
+    });
+    
+
 });
+
+const toggleInputs = disabled => {
+    $("#generate-arr-button").attr("disabled", disabled);
+    $("#sort-button").attr("disabled", disabled);
+    $("#array-size-input").attr("disabled", disabled);
+
+    $("div.alg-select-button").attr("disabled", disabled);
+    $("#div.alg-select-button").css('pointer-events','none');
+}

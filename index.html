@@ -19,23 +19,16 @@
 <body>
     <div id="header">
         <div class="left-section">
-
+            <label for="array-size-input">Array Size</label>
+            <input id="array-size-input" type="range" min="5", max="90" step="1" value="10">
+            <button id="generate-arr-button">Generate New Array</button>
         </div>
 
         <div class="right-section">
             <div class="sorting-methods-container">
-                <input type="checkbox" id="bubb">
-                <label for="bubb">Bubble Sort</label>
-
-                <input type="checkbox" id="sel">
-                <label for="sel">Slection Sort</label>
-
-                <input type="checkbox" id="inser">
-                <label for="inser">Insertion Sort</label>
-
-                <input type="checkbox" id="merge">
-                <label for="merge">Merge Sort</label>
-                
+                <div class="alg-select-button" id="bubble-sort-button">Bubble Sort</div>
+                <div class="alg-select-button" id="selection-sort-button">Selection Sort</div>
+                <div class="alg-select-button" id="insertion-sort-button">Insertion Sort</div>
             </div>
             <div class="sort-button-container">
                 <button id="sort-button">Sort</button>

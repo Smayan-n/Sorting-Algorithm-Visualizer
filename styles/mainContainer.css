@@ -1,8 +1,8 @@
 #main-container{
     display: flex;
     justify-content: center;
-    border: 1px solid black;
     padding-bottom: 20px;
+    height: 100%;
 }
 .bar{
     position: relative;
@@ -10,6 +10,7 @@
     background-color: green;
     border: 1px solid black;
     text-align: center;
+    margin-right: 5px;
 }
 
 
