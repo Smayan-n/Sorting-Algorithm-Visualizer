@@ -1,0 +1,20 @@
+#main-container{
+    display: flex;
+    justify-content: center;
+    border: 1px solid black;
+    padding-bottom: 20px;
+}
+.bar{
+    position: relative;
+    width: 20px;
+    background-color: green;
+    border: 1px solid black;
+    text-align: center;
+}
+
+
+
+
+
+
+
