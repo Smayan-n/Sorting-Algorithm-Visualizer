@@ -69,10 +69,13 @@ div .alg-select-button-active{
     color: white;
     border: none;
     cursor: pointer;
+
 }
 #generate-arr-button:hover{
     opacity: 0.8 ;
 }
 #generate-arr-button:active{
-    background-color: lightpink ;
+    background-color: lightpink;
 }
+
+

@@ -1,11 +1,12 @@
 //MODEL
-
 //numbers array
 let numbers = [];
+//stores numbers from 0 -> length of numbers
+//used to render decide when a bar is in its final sorted position
 let keyLinks = [];
 
 //populates array with random numbers in range
-const populateArray = (min, max, length) =>{
+function populateArray(min, max, length){
     //first reset arrays
     numbers = [];
     keyLinks = [];
@@ -19,7 +20,7 @@ const populateArray = (min, max, length) =>{
 
 //recursive merge sort
 let mov = [];
-const mergeSort = (array) => {
+function mergeSort(array) {
 
     //base case
     if(array.length <= 1){
@@ -39,7 +40,7 @@ const mergeSort = (array) => {
 
 }
 //helper merge method for mergeSort
-const mergeArrays = (arr1, arr2) => {
+function mergeArrays(arr1, arr2) {
     const merged = [];
     let i1 = 0;
     let i2 = 0;
@@ -75,7 +76,7 @@ const mergeArrays = (arr1, arr2) => {
 
 
 //selection sort algortihm
-const selectionSort = () =>{
+function selectionSort(){
     //arr to store all the moves
     let moves = [];
 
@@ -88,20 +89,15 @@ const selectionSort = () =>{
             moves.push([i, j, false]);
             
         }
-        //swapping nodes as well
-        //using var because it can be re-declared
-        const temp = numbers[i];
-        numbers[i] = numbers[minIndex];
-        numbers[minIndex] = temp;
+        swapValues(i, minIndex);        
         moves.push([i, minIndex, true]);
 
-        swapKeyLinks(i, minIndex);        
     }   
     return moves;
 }
 
 
-const bubbleSort = () =>{
+function bubbleSort(){
     //arr to store all the moves
     let moves = [];
 
@@ -109,13 +105,8 @@ const bubbleSort = () =>{
         for(let j = 0; j < numbers.length - i; j++){
             if(numbers[j] > numbers[j + 1]){
                 //swap
-                const temp = numbers[j + 1];
-                numbers[j + 1] = numbers[j];
-                numbers[j] = temp;
+                swapValues(j + 1, j);
                 moves.push([j, j + 1, true]);
-
-                swapKeyLinks(j + 1, j);
-
             }
             else{
                 moves.push([j, j + 1, false]);
@@ -125,7 +116,7 @@ const bubbleSort = () =>{
     return moves;
 }
 
-const insertionSort = () =>{
+function insertionSort(){
     //arr to store all the moves
     let moves = [];
 
@@ -133,12 +124,8 @@ const insertionSort = () =>{
         for(let j = i; j > 0; j--){
             if(numbers[j] < numbers[j - 1]){
                 //swap
-                const temp = numbers[j];
-                numbers[j] = numbers[j - 1];
-                numbers[j - 1] = temp;
-                moves.push([j, j - 1, true]);
-
-                swapKeyLinks(j, j - 1);
+                swapValues(j, j - 1);
+                moves.push([j, j - 1, true]);                
             }
             else{
                 moves.push([j, j - 1, false]);
@@ -149,17 +136,30 @@ const insertionSort = () =>{
     return moves;
 }
 
-//swaps keyLinks
-const swapKeyLinks = (i, j) =>{
-    const temp = keyLinks[i];
+//swaps val
+function swapValues(i, j){
+    //swap numbers
+    temp = numbers[i];
+    numbers[i] = numbers[j];
+    numbers[j] = temp;
+
+    //swap keyLinks
+    temp = keyLinks[i];
     keyLinks[i] = keyLinks[j];
     keyLinks[j] = temp;
 }
 
 //VIEW
 
+//colors for the bars
+const unsortedColor = "green";
+const sortedColor = "rgb(193, 30, 193)";
+const scanColor = "red";
+const swapColor = "aqua";
+
+
 //redners array to be displayed
-const renderArray = () =>{
+function renderArray(){
 
     //first clear the container
     $("#main-container").empty();
@@ -187,16 +187,16 @@ const renderArray = () =>{
     });
 }
 
-const setBarWidth = size => {
+function setBarWidth(size) {
     let barWidth = Math.floor(700 / size);
     $(".bar").css("width", "" + barWidth + "px");
 }
 
 //sets a different color in bars that are in their final position (sorted)
-const renderFinalColor = (bars) =>{
+function renderFinalColor(bars){
     keyLinks.forEach((keyLink, i) => {
         if(bars[i].id === ''+ keyLink){
-            renderBarStyle([bars[i]], "purple");
+            renderBarStyle([bars[i]], sortedColor);
         }
 
     });
@@ -208,12 +208,14 @@ the third element in each of the moves is a bool that states if that move is a s
 true: swap, false: scan
 */
 //handles rendering of sorting - recursive
-const renderSort = async (index, moves, bars, animationTime) =>{
+async function renderSort(index, moves, bars, animationTime){
 
     renderFinalColor(bars);
 
     //base case
     if(index >= moves.length){
+        //enable all inputs after sorting
+        toggleInputs(false);
         return;
     }
 
@@ -229,17 +231,17 @@ const renderSort = async (index, moves, bars, animationTime) =>{
     //if true, swap
     if(moves[index][2]){
         //setting css properties before animation
-        renderBarStyle([bar1, bar2], "red", "0", "0px");
+        renderBarStyle([bar1, bar2], scanColor, "0", "0px");
         //using async/await and timeout functions to achieve delay
         setTimeout(async () => {
-            renderBarStyle([bar1, bar2], "aqua", "0", "0px");
+            renderBarStyle([bar1, bar2], swapColor, "0", "0px");
 
             setTimeout(async () => {
                 //awaiting animation to be over
                 await swapBars(bar1, bar2, animationTime);
 
                 setTimeout(() =>{
-                    renderBarStyle([bar1, bar2], "green", "0", "0px");
+                    renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
                     //recurse    
                     renderSort(index + 1, moves, bars, animationTime);
 
@@ -253,9 +255,9 @@ const renderSort = async (index, moves, bars, animationTime) =>{
     }
     //if false, scan
     else{
-        renderBarStyle([bar1, bar2], "red", "0", "0px");
+        renderBarStyle([bar1, bar2], scanColor, "0", "0px");
         setTimeout(() =>{
-            renderBarStyle([bar1, bar2], "green", "0", "0px");
+            renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
             //recurse
             renderSort(index + 1, moves, bars, animationTime);
         }, animationTime);
@@ -263,7 +265,7 @@ const renderSort = async (index, moves, bars, animationTime) =>{
 }
 
 //swaps two bars
-const swapBars = (bar1, bar2, animationTime) =>{
+function swapBars(bar1, bar2, animationTime){
     //return new promise
     return new Promise((resolve) => {
         bar1 = $(bar1);
@@ -276,12 +278,12 @@ const swapBars = (bar1, bar2, animationTime) =>{
 
         bar1.animate({left: '-=' + (diff * bar1.outerWidth()) + 'px'}, animationTime, () =>{
             bar1.insertBefore(bar2);
-            renderBarStyle([bar1], "red", "0", "0px");
+            renderBarStyle([bar1], scanColor, "0", "0px");
         });
 
         bar2.animate({left: '+=' + (diff * bar2.outerWidth()) + 'px'}, animationTime, () =>{
             bar2.insertBefore(sibling);
-            renderBarStyle([bar2], "red", "0", "0px"); 
+            renderBarStyle([bar2], scanColor, "0", "0px"); 
 
             //promise resolved after this code before this runs
             resolve(true);
@@ -291,7 +293,7 @@ const swapBars = (bar1, bar2, animationTime) =>{
 }
 
 //renders bar styles(color, pos, etc)
-const renderBarStyle = (bars, bgColor, zInd, posLeft) =>{
+function renderBarStyle(bars, bgColor, zInd, posLeft){
     bars.forEach(bar =>{
         bar = $(bar);
         bar.css({
@@ -313,12 +315,12 @@ $(document).ready(function(){
     renderArray();
 
     //when swap button is pressed
-    $("#sort-button").off().on("click", function(){
+    $("#sort-button").off().on("click", async function(){
 
         //disable all other inputs
         toggleInputs(true);
         
-        //getting type of algorithm 
+        //getting type of algorithm and sorting array
         let moves = [];
         if(algorithm !== null){
             if(algorithm === "bubble-sort-button")  moves = bubbleSort();
@@ -334,14 +336,14 @@ $(document).ready(function(){
         const container = document.getElementById('main-container');
         const children = container.children;    
 
-        console.log(keyLinks);
-
         //animation time
         const arrSize = numbers.length;
         //if arr size is high, animationtime is low
         const animationTime = Math.floor(1000 / arrSize);
-        //render sort
+
+        //render sorting
         renderSort(0, moves, children, animationTime);
+
 
     });
 
@@ -375,11 +377,11 @@ $(document).ready(function(){
 
 });
 
-const toggleInputs = disabled => {
-    $("#generate-arr-button").attr("disabled", disabled);
-    $("#sort-button").attr("disabled", disabled);
-    $("#array-size-input").attr("disabled", disabled);
-
-    $("div.alg-select-button").attr("disabled", disabled);
-    $("#div.alg-select-button").css('pointer-events','none');
+function toggleInputs(disabled){
+    const inputs = [$("#generate-arr-button"),  $("#sort-button"), $("#array-size-input"), $("div.alg-select-button")];
+    
+    inputs.forEach(input => {
+        input.attr("disabled", disabled)
+            .css("pointer-events", disabled ? "none" : "all");
+    });
 }

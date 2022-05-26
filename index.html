@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Sorting Visualizer</title>
 
 
     <link rel="stylesheet" href="styles/mainContainer.css">
@@ -19,6 +19,11 @@
 <body>
     <div id="header">
         <div class="left-section">
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+
             <label for="array-size-input">Array Size</label>
             <input id="array-size-input" type="range" min="5", max="90" step="1" value="10">
             <button id="generate-arr-button">Generate New Array</button>
