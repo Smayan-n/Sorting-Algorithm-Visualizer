@@ -1,5 +1,5 @@
 //MODEL
-//numbers array
+//main numbers array
 let numbers = [];
 //stores numbers from 0 -> length of numbers
 //used to render decide when a bar is in its final sorted position
@@ -18,9 +18,13 @@ function populateArray(min, max, length){
 }
 
 
+function mergeSort(){
+    let moves = [];
+    mergeSortHelper(numbers, moves, 0, numbers.length - 1);
+}
+
 //recursive merge sort
-let mov = [];
-function mergeSort(array) {
+function mergeSortHelper(array, moves, start, end) {
 
     //base case
     if(array.length <= 1){
@@ -31,10 +35,10 @@ function mergeSort(array) {
     const mid = Math.floor(array.length / 2);
 
     let left = array.slice(0, mid);
-    left = mergeSort(left);
+    left = mergeSort(left, moves, start, end);
 
-    let right = array.slice(mid, array.length);
-    right = mergeSort(right);
+    let right = array.slice(mid);
+    right = mergeSort(right, moves, start, end);
 
     return mergeArrays(left, right);
 
@@ -170,9 +174,10 @@ function renderArray(){
 
     //loops through all numbers in array and display's it in the container
     numbers.forEach((num, index) =>{
-    
+        //TODO
         const markup = `
             <div class="bar" id="${index}">${size < 25 ? num : ''}<div>
+            <div>${index}</div>
         `;
 
         //add bar to container
@@ -231,14 +236,15 @@ async function renderSort(index, moves, bars, animationTime){
     //if true, swap
     if(moves[index][2]){
         //setting css properties before animation
-        renderBarStyle([bar1, bar2], scanColor, "0", "0px");
+        renderBarStyle([bar1, bar2], scanColor, "100", "0px");
         //using async/await and timeout functions to achieve delay
         setTimeout(async () => {
-            renderBarStyle([bar1, bar2], swapColor, "0", "0px");
+            renderBarStyle([bar1, bar2], swapColor, "100", "0px");
 
             setTimeout(async () => {
                 //awaiting animation to be over
-                await swapBars(bar1, bar2, animationTime);
+                if(moves[index][3]) await insertBar(bar1, bar2, animationTime);
+                else await swapBars(bar1, bar2, animationTime);
 
                 setTimeout(() =>{
                     renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
@@ -292,6 +298,25 @@ function swapBars(bar1, bar2, animationTime){
     
 }
 
+//insert bar1 before bar2
+function insertBar(bar1, bar2, animationTime){
+    return new Promise((resolve) => {
+        bar1 = $(bar1);
+        bar2 = $(bar2);
+        //insert bar and animate it---->
+        const diff = (bar1.index() - bar2.index());
+
+        bar1.animate({left: '-=' + (diff * bar1.outerWidth()) + 'px'}, animationTime, () =>{
+            bar1.insertBefore(bar2);
+            renderBarStyle([bar1], scanColor, "0", "0px");
+
+            resolve(true);
+        });
+    });
+    
+
+}
+
 //renders bar styles(color, pos, etc)
 function renderBarStyle(bars, bgColor, zInd, posLeft){
     bars.forEach(bar =>{
@@ -311,35 +336,36 @@ $(document).ready(function(){
     //min, max, length - default generation
     const min = 5;
     const max = 130;
-    populateArray(min, max, 10);
+    // populateArray(min, max, 10);
+    numbers = [60, 20, 90, 10];
     renderArray();
 
     //when swap button is pressed
     $("#sort-button").off().on("click", async function(){
-
-        //disable all other inputs
-        toggleInputs(true);
         
         //getting type of algorithm and sorting array
-        let moves = [];
-        if(algorithm !== null){
-            if(algorithm === "bubble-sort-button")  moves = bubbleSort();
-            else if(algorithm === "selection-sort-button")  moves = selectionSort();
-            else if(algorithm === "insertion-sort-button")  moves = insertionSort();
-        }
-        else{
-            alert("pick an algorithm");
-            return;
-        }
+        // let moves = [];
+        // if(algorithm !== null){
+        //     if(algorithm === "bubble-sort-button")  moves = bubbleSort();
+        //     else if(algorithm === "selection-sort-button")  moves = selectionSort();
+        //     else if(algorithm === "insertion-sort-button")  moves = insertionSort();
+        // }
+        // else{
+        //     alert("pick an algorithm");
+        //     return;
+        // }
+        test();
+        //disable all other inputs
+        toggleInputs(true);
 
         //get main container and its children - using vanialla js because jquery .children() is not working
         const container = document.getElementById('main-container');
         const children = container.children;    
-
         //animation time
         const arrSize = numbers.length;
         //if arr size is high, animationtime is low
-        const animationTime = Math.floor(1000 / arrSize);
+        // const animationTime = arrSize > 40 ? 1 : Math.floor(1200 / arrSize);
+        const animationTime = 50;
 
         //render sorting
         renderSort(0, moves, children, animationTime);
@@ -384,4 +410,77 @@ function toggleInputs(disabled){
         input.attr("disabled", disabled)
             .css("pointer-events", disabled ? "none" : "all");
     });
+}
+
+let moves = [];
+function test(){
+    test1(numbers, 0, numbers.length - 1);
+}
+function test1(array, start, end){
+        //base case
+        if(array.length <= 1){
+            return array;
+        }
+        //recusrive case
+    
+        const mid = Math.floor(array.length / 2);
+    
+        let left = array.slice(0, mid);
+        left = test1(left, start, mid - 1);
+    
+        let right = array.slice(mid);
+        right = test1(right, mid, end);
+    
+        return test2(left, right, start, end);
+}
+
+function test2(arr1, arr2, start, end) {
+    console.log(arr1, arr2, start, end);
+    const merged = [];
+    let i1 = 0;
+    let i2 = 0;
+    let mid = Math.floor(arr1.length);
+
+    while(true){
+        moves.push([start + i1, mid + i2, false, true]);
+        if(arr1[i1] < arr2[i2]){
+            merged.push(arr1[i1]);
+            // moves.push([start + i1, start + i1, false, true]);
+
+            i1++;
+
+            if(i1 == arr1.length){
+                for(let i = i2; i < arr2.length; i++){
+                    merged.push(arr2[i]);
+    
+                }
+                break;
+            }
+        }
+        else{
+            merged.push(arr2[i2]);
+            moves.push([mid + i2, start + i1, true, true]);
+            insertKeylink(mid + i2, start + i1);
+            start++;
+
+            i2++;
+
+            if(i2 == arr2.length){
+                for(let i = i1; i < arr1.length; i++){
+                    merged.push(arr1[i]);
+                    
+                }
+                break;
+            }
+        }     
+        
+    }
+
+    return merged;
+}
+
+function insertKeylink(i, j){
+    const temp = keyLinks[i];
+    keyLinks.splice(i, 1);
+    keyLinks.splice(j, 0, temp);
 }

@@ -29,12 +29,13 @@
     background-color: lime;
     padding: 14px;
     cursor: pointer;
-    box-shadow: -2px -2px 2px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.2);
 
 }
 .sorting-methods-container div:hover{
     opacity: 0.8;
 }
+/*when button is toggled on*/
 div .alg-select-button-active{
     box-shadow: inset 3px 3px 3px 3px rgba(0, 0, 0, 0.2);
     background-color: yellow;
@@ -72,10 +73,10 @@ div .alg-select-button-active{
 
 }
 #generate-arr-button:hover{
-    opacity: 0.8 ;
+    opacity: 0.8;
 }
 #generate-arr-button:active{
-    background-color: lightpink;
+    background-color: rgb(160, 6, 160);
 }
 
 
