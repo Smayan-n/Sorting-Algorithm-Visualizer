@@ -5,13 +5,11 @@
     padding-right: 100px;
     padding-left: 100px;
     height: 100%;
-    border: 1px solid black;
 }
 .bar{
     position: relative;
     width: 20px;
     background-color: green;
-    /* border: 1px solid black; */
     text-align: center;
 }
 

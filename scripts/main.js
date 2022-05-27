@@ -16,25 +16,25 @@ function populateArray(min, max, length){
     }
 }
 
+function mergeSort(array){
+    let moves = [];
+    array = array.slice(0);//makes copy of array
 
-let moves = [];
-function mergeSort(){
-    moves = [];
     //encode premanent index values to each number in array
-    const outArr = mergeSortHelper(numbers.map((num, index) => [num, index]), 0, numbers.length - 1);
-    numbers = outArr.map(num => num[0]);
+    const out = mergeSortHelper(array.map((num, index) => [num, index]), moves);
+    const sortedArr = out.map(num => num[0]);
 
     //configures keyLinks
     keyLinks = [];
     const bars = document.getElementById("main-container").children;
-    for(let i = 0; i < outArr.length; i++){
-        keyLinks.push(outArr[i][1]);
+    for(let i = 0; i < out.length; i++){
+        keyLinks.push(out[i][1]);
     }
     return moves;
 }
 
 //recursive merge sort
-function mergeSortHelper(array){
+function mergeSortHelper(array, moves){
     //base case
     if(array.length <= 1){
         return array;
@@ -45,13 +45,13 @@ function mergeSortHelper(array){
     let leftSplit = array.slice(0, splitIndex);
     let rightSplit = array.slice(splitIndex);
 
-    let left = mergeSortHelper(leftSplit);
-    let right = mergeSortHelper(rightSplit);
+    let left = mergeSortHelper(leftSplit, moves);
+    let right = mergeSortHelper(rightSplit, moves);
 
-    return mergeArrays(left, right);
+    return mergeArrays(left, right, moves);
 }
 
-function mergeArrays(arr1, arr2) {
+function mergeArrays(arr1, arr2, moves) {
     let merged = [];
     let i1 = 0;
     let i2 = 0;
@@ -94,15 +94,16 @@ function mergeArrays(arr1, arr2) {
 }
 
 
-function bubbleSort(){
+function bubbleSort(array){
     //arr to store all the moves
     let moves = [];
+    array = array.slice(0);//makes copy of array
 
-    for(let i = 0; i < numbers.length; i++){
-        for(let j = 0; j < numbers.length - i; j++){
-            if(numbers[j] > numbers[j + 1]){
+    for(let i = 0; i < array.length; i++){
+        for(let j = 0; j < array.length - i; j++){
+            if(array[j] > array[j + 1]){
                 //swap
-                swapValues(j + 1, j);
+                array = swapValues(j, j + 1, array);
                 moves.push([j, j + 1, true]);
             }
             else{
@@ -114,20 +115,21 @@ function bubbleSort(){
 }
 
 //selection sort algortihm
-function selectionSort(){
+function selectionSort(array){
     //arr to store all the moves
     let moves = [];
+    array = array.slice(0);//makes copy of array
 
-    for(let i = 0; i < numbers.length; i++){
+    for(let i = 0; i < array.length; i++){
         let minIndex = i;
-        for(let j = minIndex + 1; j < numbers.length; j++){
-            if(numbers[j] < numbers[minIndex]){
+        for(let j = minIndex + 1; j < array.length; j++){
+            if(array[j] < array[minIndex]){
                 minIndex = j;
             }
             moves.push([i, j, false]);
             
         }
-        swapValues(i, minIndex);        
+        swapValues(i, minIndex, array);        
         moves.push([i, minIndex, true]);
 
     }   
@@ -135,15 +137,16 @@ function selectionSort(){
 }
 
 
-function insertionSort(){
+function insertionSort(array){
     //arr to store all the moves
     let moves = [];
+    array = array.slice(0);//makes copy of array
 
-    for(let i = 1; i < numbers.length; i++){
+    for(let i = 1; i < array.length; i++){
         for(let j = i; j > 0; j--){
-            if(numbers[j] < numbers[j - 1]){
+            if(array[j] < array[j - 1]){
                 //swap
-                swapValues(j, j - 1);
+                swapValues(j, j - 1, array);
                 moves.push([j, j - 1, true]);                
             }
             else{
@@ -156,16 +159,20 @@ function insertionSort(){
 }
 
 //swaps val
-function swapValues(i, j){
+function swapValues(i, j, array){
+    
+    let temp;
     //swap numbers
-    temp = numbers[i];
-    numbers[i] = numbers[j];
-    numbers[j] = temp;
+    temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
 
     //swap keyLinks
     temp = keyLinks[i];
     keyLinks[i] = keyLinks[j];
     keyLinks[j] = temp;
+
+    return array;
 }
 
 //VIEW
@@ -203,13 +210,13 @@ function renderArray(){
 }
 //sets bar dimentions based on the size of the array
 function setBarDimentions(bar, num, size) {
-    const heightMultiplier = 4;
+    const barHeight = num * 4;
     const barWidth = Math.floor(800 / size);
 
     bar.css({
         width: "" + barWidth + "px",
-        height: "" + num * heightMultiplier + "px",
-        marginRight: "" + (size < 70 ? "5px ": "0px") 
+        height: "" + barHeight + "px",
+        marginRight: "" + (size < 70 ? "5px ": "0px"), 
     });
     bar.parent().css({
         justifyContent: "" + (size < 70 ? "center": "space-between")
@@ -392,21 +399,23 @@ $(document).ready(function(){
     
 
     //when swap button is pressed
-    $("#sort-button").off().on("click", async function(){
-        
+    $("#sort-button").off().on("click", function(){
+        reset();
+
         //getting type of algorithm and sorting array
         let moves = [];
         if(algorithm !== null){
-            if(algorithm === "bubble-sort-button")  moves = bubbleSort();
-            else if(algorithm === "selection-sort-button")  moves = selectionSort();
-            else if(algorithm === "insertion-sort-button")  moves = insertionSort();
-            else if(algorithm === "merge-sort-button") moves = mergeSort();
+            if(algorithm === "bubble-sort-button")  moves = bubbleSort(numbers);
+            else if(algorithm === "selection-sort-button")  moves = selectionSort(numbers);
+            else if(algorithm === "insertion-sort-button")  moves = insertionSort(numbers);
+            else if(algorithm === "merge-sort-button") moves = mergeSort(numbers);
 
         }
         else{
             alert("pick an algorithm");
             return;
         }
+
         //disable all other inputs
         toggleInputs(true);
 
@@ -419,7 +428,7 @@ $(document).ready(function(){
 
         //if arr size is high, animationtime is low
         const animationTime = arrSize > 40 ? 1 : Math.floor(1500 / arrSize);
-        // const animationTime = 1500;
+        // const animationTime = 10;
 
         //render sort
         renderSort(0, moves, children, animationTime);
@@ -460,10 +469,23 @@ $(document).ready(function(){
 //disables and enables inputs
 function toggleInputs(disabled){
     //array on inputs
-    const inputs = [$("#generate-arr-button"),  $("#sort-button"), $("#array-size-input"), $("div.alg-select-button")];
+    const inputs = [$("#generate-arr-button"), $("#sort-button"), $("#array-size-input"), $("div.alg-select-button")];
     
     inputs.forEach(input => {
         input.attr("disabled", disabled)
+            //diables hover an active css effects
             .css("pointer-events", disabled ? "none" : "all");
     });
+
+}
+//resets the page for new sort
+function reset(){
+    //resets keylinks
+    keyLinks = [];
+    for(let i = 0; i < numbers.length; i++){
+        keyLinks.push(i);
+    }
+
+    renderArray();
+
 }

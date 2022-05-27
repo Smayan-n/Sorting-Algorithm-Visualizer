@@ -53,12 +53,15 @@ div .alg-select-button-active{
 #sort-button:hover{
     background-color: rgb(0, 200, 255);
 }
-
+#sort-button:active{
+    background-color: rgb(0, 150, 255);
+}
 .left-section{
     display: flex;
-    flex: 1;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-left: 50px;
+    margin-right: 50px;
 }
 #array-size-input{
     margin-left: 10px;
