@@ -18,86 +18,80 @@ function populateArray(min, max, length){
 }
 
 
+let moves = [];
 function mergeSort(){
-    let moves = [];
-    mergeSortHelper(numbers, moves, 0, numbers.length - 1);
+    moves = [];
+    //encode premanent index values to each number in array
+    const outArr = mergeSortHelper(numbers.map((num, index) => [num, index]), 0, numbers.length - 1);
+    numbers = outArr.map(num => num[0]);
+
+    //configures keyLinks
+    keyLinks = [];
+    const bars = document.getElementById("main-container").children;
+    for(let i = 0; i < outArr.length; i++){
+        keyLinks.push(outArr[i][1]);
+    }
+    return moves;
 }
 
 //recursive merge sort
-function mergeSortHelper(array, moves, start, end) {
-
+function mergeSortHelper(array){
     //base case
     if(array.length <= 1){
         return array;
     }
-    //recusrive case
+    //recursive case
+    const splitIndex = Math.floor(array.length / 2);
+    
+    let leftSplit = array.slice(0, splitIndex);
+    let rightSplit = array.slice(splitIndex);
 
-    const mid = Math.floor(array.length / 2);
-
-    let left = array.slice(0, mid);
-    left = mergeSort(left, moves, start, end);
-
-    let right = array.slice(mid);
-    right = mergeSort(right, moves, start, end);
+    let left = mergeSortHelper(leftSplit);
+    let right = mergeSortHelper(rightSplit);
 
     return mergeArrays(left, right);
-
 }
-//helper merge method for mergeSort
+
 function mergeArrays(arr1, arr2) {
-    const merged = [];
+    let merged = [];
     let i1 = 0;
     let i2 = 0;
 
     while(true){
-        if(arr1[i1] < arr2[i2]){
+        
+        if(arr1[i1][0] < arr2[i2][0]){
             merged.push(arr1[i1]);
+            //using encoded index values to determine the values needed to be inserted
+            moves.push([arr2[i2][1], arr1[i1][1], false, false]);
+
             i1++;
 
             if(i1 == arr1.length){
                 for(let i = i2; i < arr2.length; i++){
                     merged.push(arr2[i]);
+    
                 }
                 break;
             }
         }
         else{
             merged.push(arr2[i2]);
+            //using encoded index values to determine the values needed to be inserted
+            moves.push([arr2[i2][1], arr1[i1][1], true, true]);
+
             i2++;
 
             if(i2 == arr2.length){
                 for(let i = i1; i < arr1.length; i++){
                     merged.push(arr1[i]);
+                    
                 }
                 break;
             }
         }     
         
-    }
-    console.log(merged);
-    return merged;
-}
-
-
-//selection sort algortihm
-function selectionSort(){
-    //arr to store all the moves
-    let moves = [];
-
-    for(let i = 0; i < numbers.length; i++){
-        let minIndex = i;
-        for(let j = minIndex + 1; j < numbers.length; j++){
-            if(numbers[j] < numbers[minIndex]){
-                minIndex = j;
-            }
-            moves.push([i, j, false]);
-            
-        }
-        swapValues(i, minIndex);        
-        moves.push([i, minIndex, true]);
-
     }   
-    return moves;
+    return merged;
 }
 
 
@@ -176,8 +170,7 @@ function renderArray(){
     numbers.forEach((num, index) =>{
         //TODO
         const markup = `
-            <div class="bar" id="${index}">${size < 25 ? num : ''}<div>
-            <div>${index}</div>
+            <div class="bar" id="${index}">${size < 25 ? num : ''}</div>
         `;
 
         //add bar to container
@@ -207,6 +200,29 @@ function renderFinalColor(bars){
     });
 }
 
+//converts the index swap values of the permanent indexes to actual indexes of the bars in the DOM
+function keyLinkToIndex(move, bars){
+    return new Promise((resolve) => {
+
+        let barIndex;
+        let InsertBehindIndex;
+
+        for(let i = 0; i < bars.length; i++){
+            if(bars[i].id == move[0]){//look
+                barIndex = i;
+            }
+            if(bars[i].id == move[1]){
+                InsertBehindIndex = i;
+            }
+        }
+        move[0] = barIndex;
+        move[1] = InsertBehindIndex;
+        resolve(move);
+
+            
+    });
+}
+
 /*NOTE: the moves array stores all the scans and swaps done on the 
 numbers array while sorting.
 the third element in each of the moves is a bool that states if that move is a swap or a scan
@@ -222,6 +238,10 @@ async function renderSort(index, moves, bars, animationTime){
         //enable all inputs after sorting
         toggleInputs(false);
         return;
+    }
+
+    if(moves[index][3]){
+        moves[index] = await keyLinkToIndex(moves[index], bars);
     }
 
     //recursive case
@@ -335,39 +355,43 @@ function renderBarStyle(bars, bgColor, zInd, posLeft){
 $(document).ready(function(){
     //min, max, length - default generation
     const min = 5;
-    const max = 130;
-    // populateArray(min, max, 10);
-    numbers = [60, 20, 90, 10];
+    const max = 150;
+    populateArray(min, max, 10);
     renderArray();
+    
 
     //when swap button is pressed
     $("#sort-button").off().on("click", async function(){
         
         //getting type of algorithm and sorting array
-        // let moves = [];
-        // if(algorithm !== null){
-        //     if(algorithm === "bubble-sort-button")  moves = bubbleSort();
-        //     else if(algorithm === "selection-sort-button")  moves = selectionSort();
-        //     else if(algorithm === "insertion-sort-button")  moves = insertionSort();
-        // }
-        // else{
-        //     alert("pick an algorithm");
-        //     return;
-        // }
-        test();
+        let moves = [];
+        if(algorithm !== null){
+            if(algorithm === "bubble-sort-button")  moves = bubbleSort();
+            else if(algorithm === "selection-sort-button")  moves = selectionSort();
+            else if(algorithm === "insertion-sort-button")  moves = insertionSort();
+            else if(algorithm === "merge-sort-button") moves = mergeSort();
+
+        }
+        else{
+            alert("pick an algorithm");
+            return;
+        }
+
         //disable all other inputs
         toggleInputs(true);
 
         //get main container and its children - using vanialla js because jquery .children() is not working
         const container = document.getElementById('main-container');
-        const children = container.children;    
+        const children = container.children;
+
         //animation time
         const arrSize = numbers.length;
-        //if arr size is high, animationtime is low
-        // const animationTime = arrSize > 40 ? 1 : Math.floor(1200 / arrSize);
-        const animationTime = 50;
 
-        //render sorting
+        //if arr size is high, animationtime is low
+        const animationTime = arrSize > 40 ? 1 : Math.floor(1200 / arrSize);
+        // const animationTime = 500;
+
+        //render sort
         renderSort(0, moves, children, animationTime);
 
 
@@ -403,84 +427,13 @@ $(document).ready(function(){
 
 });
 
+//disables and enables inputs
 function toggleInputs(disabled){
+    //array on inputs
     const inputs = [$("#generate-arr-button"),  $("#sort-button"), $("#array-size-input"), $("div.alg-select-button")];
     
     inputs.forEach(input => {
         input.attr("disabled", disabled)
             .css("pointer-events", disabled ? "none" : "all");
     });
-}
-
-let moves = [];
-function test(){
-    test1(numbers, 0, numbers.length - 1);
-}
-function test1(array, start, end){
-        //base case
-        if(array.length <= 1){
-            return array;
-        }
-        //recusrive case
-    
-        const mid = Math.floor(array.length / 2);
-    
-        let left = array.slice(0, mid);
-        left = test1(left, start, mid - 1);
-    
-        let right = array.slice(mid);
-        right = test1(right, mid, end);
-    
-        return test2(left, right, start, end);
-}
-
-function test2(arr1, arr2, start, end) {
-    console.log(arr1, arr2, start, end);
-    const merged = [];
-    let i1 = 0;
-    let i2 = 0;
-    let mid = Math.floor(arr1.length);
-
-    while(true){
-        moves.push([start + i1, mid + i2, false, true]);
-        if(arr1[i1] < arr2[i2]){
-            merged.push(arr1[i1]);
-            // moves.push([start + i1, start + i1, false, true]);
-
-            i1++;
-
-            if(i1 == arr1.length){
-                for(let i = i2; i < arr2.length; i++){
-                    merged.push(arr2[i]);
-    
-                }
-                break;
-            }
-        }
-        else{
-            merged.push(arr2[i2]);
-            moves.push([mid + i2, start + i1, true, true]);
-            insertKeylink(mid + i2, start + i1);
-            start++;
-
-            i2++;
-
-            if(i2 == arr2.length){
-                for(let i = i1; i < arr1.length; i++){
-                    merged.push(arr1[i]);
-                    
-                }
-                break;
-            }
-        }     
-        
-    }
-
-    return merged;
-}
-
-function insertKeylink(i, j){
-    const temp = keyLinks[i];
-    keyLinks.splice(i, 1);
-    keyLinks.splice(j, 0, temp);
 }
