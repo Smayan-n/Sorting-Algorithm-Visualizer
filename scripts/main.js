@@ -1,8 +1,7 @@
 //MODEL
 //main numbers array
 let numbers = [];
-//stores numbers from 0 -> length of numbers
-//used to render decide when a bar is in its final sorted position
+//stores numbers from 0 -> length of numbers - each number is a permanent index given to a number
 let keyLinks = [];
 
 //populates array with random numbers in range
@@ -62,7 +61,7 @@ function mergeArrays(arr1, arr2) {
         if(arr1[i1][0] < arr2[i2][0]){
             merged.push(arr1[i1]);
             //using encoded index values to determine the values needed to be inserted
-            moves.push([arr2[i2][1], arr1[i1][1], false, false]);
+            moves.push([arr2[i2][1], arr1[i1][1], false, true]);
 
             i1++;
 
@@ -114,6 +113,28 @@ function bubbleSort(){
     return moves;
 }
 
+//selection sort algortihm
+function selectionSort(){
+    //arr to store all the moves
+    let moves = [];
+
+    for(let i = 0; i < numbers.length; i++){
+        let minIndex = i;
+        for(let j = minIndex + 1; j < numbers.length; j++){
+            if(numbers[j] < numbers[minIndex]){
+                minIndex = j;
+            }
+            moves.push([i, j, false]);
+            
+        }
+        swapValues(i, minIndex);        
+        moves.push([i, minIndex, true]);
+
+    }   
+    return moves;
+}
+
+
 function insertionSort(){
     //arr to store all the moves
     let moves = [];
@@ -162,8 +183,6 @@ function renderArray(){
     //first clear the container
     $("#main-container").empty();
 
-    //height multiplier for the bars
-    const heightMultiplier = 4;
     const size = numbers.length;
 
     //loops through all numbers in array and display's it in the container
@@ -176,18 +195,25 @@ function renderArray(){
         //add bar to container
         const bar = $(markup);
         $("#main-container").append(bar);
-
-        //style bar
-        bar.css("height", "" + num * heightMultiplier + "px");
-    
-    setBarWidth(size);
+        
+        //bar dimentions
+        setBarDimentions(bar, num, size);
 
     });
 }
+//sets bar dimentions based on the size of the array
+function setBarDimentions(bar, num, size) {
+    const heightMultiplier = 4;
+    const barWidth = Math.floor(800 / size);
 
-function setBarWidth(size) {
-    let barWidth = Math.floor(700 / size);
-    $(".bar").css("width", "" + barWidth + "px");
+    bar.css({
+        width: "" + barWidth + "px",
+        height: "" + num * heightMultiplier + "px",
+        marginRight: "" + (size < 70 ? "5px ": "0px") 
+    });
+    bar.parent().css({
+        justifyContent: "" + (size < 70 ? "center": "space-between")
+    });
 }
 
 //sets a different color in bars that are in their final position (sorted)
@@ -227,6 +253,11 @@ function keyLinkToIndex(move, bars){
 numbers array while sorting.
 the third element in each of the moves is a bool that states if that move is a swap or a scan
 true: swap, false: scan
+
+The fourth element in each move is a bool that states if the move container the actual index 
+or the permanent keyLink index
+true: permanent keyLink index, false: actual index
+if moves[index][3] is true, the permanent keyLink index is converted to an actual index
 */
 //handles rendering of sorting - recursive
 async function renderSort(index, moves, bars, animationTime){
@@ -249,7 +280,7 @@ async function renderSort(index, moves, bars, animationTime){
     //getting bars from index values out of moves
     let bar1 = bars[moves[index][0]];
     let bar2 = bars[moves[index][1]];
-    //converting html elements to jquery objects
+    //converting html elements to jquery objects that can be used for animations, etc
     bar1 = $(bar1);
     bar2 = $(bar2);
 
@@ -354,7 +385,7 @@ function renderBarStyle(bars, bgColor, zInd, posLeft){
 //after page is fully loaded
 $(document).ready(function(){
     //min, max, length - default generation
-    const min = 5;
+    const min = 10;
     const max = 150;
     populateArray(min, max, 10);
     renderArray();
@@ -376,7 +407,6 @@ $(document).ready(function(){
             alert("pick an algorithm");
             return;
         }
-
         //disable all other inputs
         toggleInputs(true);
 
@@ -388,8 +418,8 @@ $(document).ready(function(){
         const arrSize = numbers.length;
 
         //if arr size is high, animationtime is low
-        const animationTime = arrSize > 40 ? 1 : Math.floor(1200 / arrSize);
-        // const animationTime = 500;
+        const animationTime = arrSize > 40 ? 1 : Math.floor(1500 / arrSize);
+        // const animationTime = 1500;
 
         //render sort
         renderSort(0, moves, children, animationTime);
