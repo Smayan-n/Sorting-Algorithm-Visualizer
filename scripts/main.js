@@ -16,6 +16,59 @@ function populateArray(min, max, length){
     }
 }
 
+function quickSort(array){
+    let moves = [];
+    array = array.slice(0);
+    quickSortHelper(array, 0, array.length - 1, moves);
+
+    return moves;
+}
+//recursive quick sort
+function quickSortHelper(array, low, high, moves){
+    //base case
+    if(low < high){
+
+        let pivotIndex = partition(array, low, high, moves);
+
+        quickSortHelper(array, low, pivotIndex - 1, moves);
+        quickSortHelper(array, pivotIndex + 1, high, moves);
+    }
+}
+
+function partition(array, low, high, moves){
+
+
+    let [pivot, pivotIndex] = findPivot(array, low, high);
+
+    swapValues(pivotIndex, high, array);//swap pivot with element at high
+    moves.push([pivotIndex, high, true, false]);
+
+    let leftIndex = (low - 1);
+
+    for(let j = low; j <= high - 1; j++){
+        
+        if(array[j] < pivot){
+            leftIndex++;
+            swapValues(leftIndex, j, array);
+            moves.push([leftIndex, j, true, false]);
+        }
+        else{
+            moves.push([leftIndex, j, false, false]);
+        }
+    }
+    swapValues(leftIndex + 1, high, array);
+    moves.push([leftIndex + 1, high, true, false]);
+
+    return (leftIndex + 1);
+}
+//finds and returns median of low, mid, and high -> which will be used as the pivot
+function findPivot(array, low, high){
+    let arr = [[array[low], low], [array[Math.floor((low + high) / 2)], Math.floor((low + high) / 2)], [array[high], high]];
+    arr.sort((a, b) => a[0] - b[0]);
+    return arr[1];
+}
+
+
 function mergeSort(array){
     let moves = [];
     array = array.slice(0);//makes copy of array
@@ -24,14 +77,14 @@ function mergeSort(array){
     const out = mergeSortHelper(array.map((num, index) => [num, index]), moves);
     const sortedArr = out.map(num => num[0]);
 
-    //configures keyLinks
+        //configures keyLinks
     keyLinks = [];
-    const bars = document.getElementById("main-container").children;
     for(let i = 0; i < out.length; i++){
         keyLinks.push(out[i][1]);
     }
     return moves;
 }
+
 
 //recursive merge sort
 function mergeSortHelper(array, moves){
@@ -103,7 +156,7 @@ function bubbleSort(array){
         for(let j = 0; j < array.length - i; j++){
             if(array[j] > array[j + 1]){
                 //swap
-                array = swapValues(j, j + 1, array);
+                swapValues(j, j + 1, array);
                 moves.push([j, j + 1, true]);
             }
             else{
@@ -171,8 +224,6 @@ function swapValues(i, j, array){
     temp = keyLinks[i];
     keyLinks[i] = keyLinks[j];
     keyLinks[j] = temp;
-
-    return array;
 }
 
 //VIEW
@@ -409,13 +460,15 @@ $(document).ready(function(){
             else if(algorithm === "selection-sort-button")  moves = selectionSort(numbers);
             else if(algorithm === "insertion-sort-button")  moves = insertionSort(numbers);
             else if(algorithm === "merge-sort-button") moves = mergeSort(numbers);
+            else if(algorithm === "quick-sort-button") moves = quickSort(numbers);
 
         }
         else{
             alert("pick an algorithm");
             return;
         }
-
+        console.log(moves.length);
+        
         //disable all other inputs
         toggleInputs(true);
 
