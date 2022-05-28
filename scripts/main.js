@@ -467,8 +467,6 @@ $(document).ready(function(){
             alert("pick an algorithm");
             return;
         }
-        console.log(moves.length);
-        
         //disable all other inputs
         toggleInputs(true);
 
