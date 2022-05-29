@@ -59,6 +59,7 @@ div .alg-select-button-active{
 .left-section{
     display: flex;
     justify-content: flex-start;
+    flex-shrink: 0;
     align-items: center;
     padding-left: 50px;
     margin-right: 50px;
@@ -67,6 +68,10 @@ div .alg-select-button-active{
     margin-left: 10px;
     margin-right: 20px;
 }
+#array-size-label{
+    width: 120px;
+}
+
 #generate-arr-button{
     padding: 20px;
     background-color: purple;

@@ -178,6 +178,7 @@ function selectionSort(array){
         for(let j = minIndex + 1; j < array.length; j++){
             if(array[j] < array[minIndex]){
                 minIndex = j;
+
             }
             moves.push([i, j, false]);
             
@@ -318,7 +319,7 @@ true: permanent keyLink index, false: actual index
 if moves[index][3] is true, the permanent keyLink index is converted to an actual index
 */
 //handles rendering of sorting - recursive
-async function renderSort(index, moves, bars, animationTime){
+async function renderSort(index, moves, bars, animationTime, startTime){
 
     renderFinalColor(bars);
 
@@ -326,8 +327,10 @@ async function renderSort(index, moves, bars, animationTime){
     if(index >= moves.length){
         //enable all inputs after sorting
         toggleInputs(false);
+        // console.log(new Date().getTime() - startTime);
         return;
     }
+
 
     if(moves[index][3]){
         moves[index] = await keyLinkToIndex(moves[index], bars);
@@ -358,7 +361,7 @@ async function renderSort(index, moves, bars, animationTime){
                 setTimeout(() =>{
                     renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
                     //recurse    
-                    renderSort(index + 1, moves, bars, animationTime);
+                    renderSort(index + 1, moves, bars, animationTime, startTime);
 
                 }, animationTime);
 
@@ -374,7 +377,7 @@ async function renderSort(index, moves, bars, animationTime){
         setTimeout(() =>{
             renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
             //recurse
-            renderSort(index + 1, moves, bars, animationTime);
+            renderSort(index + 1, moves, bars, animationTime, startTime);
         }, animationTime);
     }
 }
@@ -479,11 +482,11 @@ $(document).ready(function(){
 
         //if arr size is high, animationtime is low
         const animationTime = arrSize > 40 ? 1 : Math.floor(1500 / arrSize);
-        // const animationTime = 10;
+        // const animationTime = 1;
 
         //render sort
-        renderSort(0, moves, children, animationTime);
-
+        let startTime = new Date().getTime();
+        renderSort(0, moves, children, animationTime, startTime);
 
     });
 
@@ -503,6 +506,9 @@ $(document).ready(function(){
         const size = parseInt($(this).val());
         populateArray(min, max, size);
         renderArray();
+
+        //also display array size on UI
+        $("#array-size-label").text("Array Size (" + size + ")");
         
     });
 

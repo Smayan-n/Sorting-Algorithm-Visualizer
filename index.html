@@ -14,25 +14,24 @@
     <!--scripts-->
     <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
     <script src="scripts/main.js"></script>
-    <script src="scripts/test.js"></script>
 
 </head>
 <body>
     <div id="header">
         <div class="left-section">
 
-            <label for="array-size-input">Array Size</label>
+            <label id="array-size-label" for="array-size-input">Array Size (10)</label>
             <input id="array-size-input" type="range" min="5", max="200" step="1" value="10">
             <button id="generate-arr-button">Generate New Array</button>
         </div>
 
         <div class="right-section">
             <div class="sorting-methods-container">
-                <div class="alg-select-button" id="bubble-sort-button">Bubble Sort</div>
-                <div class="alg-select-button" id="selection-sort-button">Selection Sort</div>
-                <div class="alg-select-button" id="insertion-sort-button">Insertion Sort</div>
-                <div class="alg-select-button" id="merge-sort-button">Merge Sort</div>
-                <div class="alg-select-button" id="quick-sort-button">Quick Sort</div>
+                <div class="alg-select-button btn" id="bubble-sort-button">Bubble Sort</div>
+                <div class="alg-select-button btn" id="selection-sort-button">Selection Sort</div>
+                <div class="alg-select-button btn" id="insertion-sort-button">Insertion Sort</div>
+                <div class="alg-select-button btn" id="merge-sort-button">Merge Sort</div>
+                <div class="alg-select-button btn" id="quick-sort-button">Quick Sort</div>
             </div>
             <div class="sort-button-container">
                 <button id="sort-button">Sort</button>
