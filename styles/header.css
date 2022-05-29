@@ -12,12 +12,7 @@
     z-index: 100;
 
 }
-.right-section{
-    display: flex;
-    flex: 1;
-    justify-content: center;
-    align-items: center;
-}
+
 .sorting-methods-container{
     display: flex;
     justify-content: center;
