@@ -53,7 +53,7 @@ function partition(array, low, high, moves){
             moves.push([leftIndex, j, true, false]);
         }
         else{
-            moves.push([leftIndex, j, false, false]);
+            // moves.push([leftIndex, j, false, false]);
         }
     }
     swapValues(leftIndex + 1, high, array);
@@ -212,7 +212,7 @@ function insertionSort(array){
     return moves;
 }
 
-//swaps val
+//utility method that swaps values
 function swapValues(i, j, array){
     
     let temp;
@@ -231,7 +231,7 @@ function swapValues(i, j, array){
 
 //colors for the bars
 const unsortedColor = "green";
-const sortedColor = "rgb(193, 30, 193)";
+const sortedColor = "purple";
 const scanColor = "red";
 const swapColor = "aqua";
 
@@ -264,15 +264,17 @@ function renderArray(){
 function setBarDimentions(bar, num, size) {
     const barHeight = num * 4;
     const barWidth = Math.floor(800 / size);
+    const margin = size > 80 ? 2 : Math.floor(150 / size);
 
     bar.css({
         width: "" + barWidth + "px",
         height: "" + barHeight + "px",
-        marginRight: "" + (size < 70 ? "5px ": "0px"), 
+        // marginRight: "" + (size < 70 ? "5px ": "0px"), 
+        marginRight: "" + margin + "px", 
     });
-    bar.parent().css({
-        justifyContent: "" + (size < 70 ? "center": "space-between")
-    });
+    // bar.parent().css({
+    //     justifyContent: "" + (size < 70 ? "center": "space-between")
+    // });
 }
 
 //sets a different color in bars that are in their final position (sorted)
@@ -382,7 +384,7 @@ async function renderSort(index, moves, bars, animationTime, startTime){
     }
 }
 
-//swaps two bars
+//swaps bar1 and bar2
 function swapBars(bar1, bar2, animationTime){
     //return new promise
     return new Promise((resolve) => {
@@ -429,7 +431,7 @@ function insertBar(bar1, bar2, animationTime){
 
 }
 
-//renders bar styles(color, pos, etc)
+//render bar styles(color, pos, etc)
 function renderBarStyle(bars, bgColor, zInd, posLeft){
     bars.forEach(bar =>{
         bar = $(bar);
@@ -449,8 +451,7 @@ $(document).ready(function(){
     const min = 10;
     const max = 150;
     populateArray(min, max, 10);
-    renderArray();
-    
+    renderArray();    
 
     //when swap button is pressed
     $("#sort-button").off().on("click", function(){
@@ -481,7 +482,7 @@ $(document).ready(function(){
         const arrSize = numbers.length;
 
         //if arr size is high, animationtime is low
-        const animationTime = arrSize > 40 ? 1 : Math.floor(1500 / arrSize);
+        const animationTime = arrSize > 50 ? (arrSize > 100 ? 1 : 10) : Math.floor(1500 / arrSize);
         // const animationTime = 1;
 
         //render sort
