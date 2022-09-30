@@ -5,226 +5,212 @@ let numbers = [];
 let keyLinks = [];
 
 //populates array with random numbers in range
-function populateArray(min, max, length){
-    //first reset arrays
-    numbers = [];
-    keyLinks = [];
-    for(let i = 0; i < length; i++){
-        const rand = Math.floor(Math.random() * (max - min + 1) + min);
-        numbers.push(rand);
-        keyLinks.push(i);
-    }
+function populateArray(min, max, length) {
+	//first reset arrays
+	numbers = [];
+	keyLinks = [];
+	for (let i = 0; i < length; i++) {
+		const rand = Math.floor(Math.random() * (max - min + 1) + min);
+		numbers.push(rand);
+		keyLinks.push(i);
+	}
 }
 
-function quickSort(array){
-    let moves = [];
-    array = array.slice(0);
-    quickSortHelper(array, 0, array.length - 1, moves);
+function quickSort(array) {
+	let moves = [];
+	array = array.slice(0);
+	quickSortHelper(array, 0, array.length - 1, moves);
 
-    return moves;
+	return moves;
 }
 //recursive quick sort
-function quickSortHelper(array, low, high, moves){
-    //base case
-    if(low < high){
+function quickSortHelper(array, low, high, moves) {
+	//base case
+	if (low < high) {
+		let pivotIndex = partition(array, low, high, moves);
 
-        let pivotIndex = partition(array, low, high, moves);
-
-        quickSortHelper(array, low, pivotIndex - 1, moves);
-        quickSortHelper(array, pivotIndex + 1, high, moves);
-    }
+		quickSortHelper(array, low, pivotIndex - 1, moves);
+		quickSortHelper(array, pivotIndex + 1, high, moves);
+	}
 }
 
-function partition(array, low, high, moves){
+function partition(array, low, high, moves) {
+	let [pivot, pivotIndex] = findPivot(array, low, high);
 
+	swapValues(pivotIndex, high, array); //swap pivot with element at high
+	moves.push([pivotIndex, high, true, false]);
 
-    let [pivot, pivotIndex] = findPivot(array, low, high);
+	let leftIndex = low - 1;
 
-    swapValues(pivotIndex, high, array);//swap pivot with element at high
-    moves.push([pivotIndex, high, true, false]);
+	for (let j = low; j <= high - 1; j++) {
+		if (array[j] < pivot) {
+			leftIndex++;
+			swapValues(leftIndex, j, array);
+			moves.push([leftIndex, j, true, false]);
+		} else {
+			// moves.push([leftIndex, j, false, false]);
+		}
+	}
+	swapValues(leftIndex + 1, high, array);
+	moves.push([leftIndex + 1, high, true, false]);
 
-    let leftIndex = (low - 1);
-
-    for(let j = low; j <= high - 1; j++){
-        
-        if(array[j] < pivot){
-            leftIndex++;
-            swapValues(leftIndex, j, array);
-            moves.push([leftIndex, j, true, false]);
-        }
-        else{
-            // moves.push([leftIndex, j, false, false]);
-        }
-    }
-    swapValues(leftIndex + 1, high, array);
-    moves.push([leftIndex + 1, high, true, false]);
-
-    return (leftIndex + 1);
+	return leftIndex + 1;
 }
 //finds and returns median of low, mid, and high -> which will be used as the pivot
-function findPivot(array, low, high){
-    let arr = [[array[low], low], [array[Math.floor((low + high) / 2)], Math.floor((low + high) / 2)], [array[high], high]];
-    arr.sort((a, b) => a[0] - b[0]);
-    return arr[1];
+function findPivot(array, low, high) {
+	let arr = [
+		[array[low], low],
+		[array[Math.floor((low + high) / 2)], Math.floor((low + high) / 2)],
+		[array[high], high],
+	];
+	arr.sort((a, b) => a[0] - b[0]);
+	return arr[1];
 }
 
+function mergeSort(array) {
+	let moves = [];
+	array = array.slice(0); //makes copy of array
 
-function mergeSort(array){
-    let moves = [];
-    array = array.slice(0);//makes copy of array
+	//encode premanent index values to each number in array
+	const out = mergeSortHelper(
+		array.map((num, index) => [num, index]),
+		moves
+	);
+	const sortedArr = out.map((num) => num[0]);
 
-    //encode premanent index values to each number in array
-    const out = mergeSortHelper(array.map((num, index) => [num, index]), moves);
-    const sortedArr = out.map(num => num[0]);
-
-        //configures keyLinks
-    keyLinks = [];
-    for(let i = 0; i < out.length; i++){
-        keyLinks.push(out[i][1]);
-    }
-    return moves;
+	//configures keyLinks
+	keyLinks = [];
+	for (let i = 0; i < out.length; i++) {
+		keyLinks.push(out[i][1]);
+	}
+	return moves;
 }
-
 
 //recursive merge sort
-function mergeSortHelper(array, moves){
-    //base case
-    if(array.length <= 1){
-        return array;
-    }
-    //recursive case
-    const splitIndex = Math.floor(array.length / 2);
-    
-    let leftSplit = array.slice(0, splitIndex);
-    let rightSplit = array.slice(splitIndex);
+function mergeSortHelper(array, moves) {
+	//base case
+	if (array.length <= 1) {
+		return array;
+	}
+	//recursive case
+	const splitIndex = Math.floor(array.length / 2);
 
-    let left = mergeSortHelper(leftSplit, moves);
-    let right = mergeSortHelper(rightSplit, moves);
+	let leftSplit = array.slice(0, splitIndex);
+	let rightSplit = array.slice(splitIndex);
 
-    return mergeArrays(left, right, moves);
+	let left = mergeSortHelper(leftSplit, moves);
+	let right = mergeSortHelper(rightSplit, moves);
+
+	return mergeArrays(left, right, moves);
 }
 
 function mergeArrays(arr1, arr2, moves) {
-    let merged = [];
-    let i1 = 0;
-    let i2 = 0;
+	let merged = [];
+	let i1 = 0;
+	let i2 = 0;
 
-    while(true){
-        
-        if(arr1[i1][0] < arr2[i2][0]){
-            merged.push(arr1[i1]);
-            //using encoded index values to determine the values needed to be inserted
-            moves.push([arr2[i2][1], arr1[i1][1], false, true]);
+	while (true) {
+		if (arr1[i1][0] < arr2[i2][0]) {
+			merged.push(arr1[i1]);
+			//using encoded index values to determine the values needed to be inserted
+			moves.push([arr2[i2][1], arr1[i1][1], false, true]);
 
-            i1++;
+			i1++;
 
-            if(i1 == arr1.length){
-                for(let i = i2; i < arr2.length; i++){
-                    merged.push(arr2[i]);
-    
-                }
-                break;
-            }
-        }
-        else{
-            merged.push(arr2[i2]);
-            //using encoded index values to determine the values needed to be inserted
-            moves.push([arr2[i2][1], arr1[i1][1], true, true]);
+			if (i1 == arr1.length) {
+				for (let i = i2; i < arr2.length; i++) {
+					merged.push(arr2[i]);
+				}
+				break;
+			}
+		} else {
+			merged.push(arr2[i2]);
+			//using encoded index values to determine the values needed to be inserted
+			moves.push([arr2[i2][1], arr1[i1][1], true, true]);
 
-            i2++;
+			i2++;
 
-            if(i2 == arr2.length){
-                for(let i = i1; i < arr1.length; i++){
-                    merged.push(arr1[i]);
-                    
-                }
-                break;
-            }
-        }     
-        
-    }   
-    return merged;
+			if (i2 == arr2.length) {
+				for (let i = i1; i < arr1.length; i++) {
+					merged.push(arr1[i]);
+				}
+				break;
+			}
+		}
+	}
+	return merged;
 }
 
+function bubbleSort(array) {
+	//arr to store all the moves
+	let moves = [];
+	array = array.slice(0); //makes copy of array
 
-function bubbleSort(array){
-    //arr to store all the moves
-    let moves = [];
-    array = array.slice(0);//makes copy of array
-
-    for(let i = 0; i < array.length; i++){
-        for(let j = 0; j < array.length - i; j++){
-            if(array[j] > array[j + 1]){
-                //swap
-                swapValues(j, j + 1, array);
-                moves.push([j, j + 1, true]);
-            }
-            else{
-                moves.push([j, j + 1, false]);
-            }
-        }
-    }
-    return moves;
+	for (let i = 0; i < array.length; i++) {
+		for (let j = 0; j < array.length - i; j++) {
+			if (array[j] > array[j + 1]) {
+				//swap
+				swapValues(j, j + 1, array);
+				moves.push([j, j + 1, true]);
+			} else {
+				moves.push([j, j + 1, false]);
+			}
+		}
+	}
+	return moves;
 }
 
 //selection sort algortihm
-function selectionSort(array){
-    //arr to store all the moves
-    let moves = [];
-    array = array.slice(0);//makes copy of array
+function selectionSort(array) {
+	//arr to store all the moves
+	let moves = [];
+	array = array.slice(0); //makes copy of array
 
-    for(let i = 0; i < array.length; i++){
-        let minIndex = i;
-        for(let j = minIndex + 1; j < array.length; j++){
-            if(array[j] < array[minIndex]){
-                minIndex = j;
-
-            }
-            moves.push([i, j, false]);
-            
-        }
-        swapValues(i, minIndex, array);        
-        moves.push([i, minIndex, true]);
-
-    }   
-    return moves;
+	for (let i = 0; i < array.length; i++) {
+		let minIndex = i;
+		for (let j = minIndex + 1; j < array.length; j++) {
+			if (array[j] < array[minIndex]) {
+				minIndex = j;
+			}
+			moves.push([i, j, false]);
+		}
+		swapValues(i, minIndex, array);
+		moves.push([i, minIndex, true]);
+	}
+	return moves;
 }
 
+function insertionSort(array) {
+	//arr to store all the moves
+	let moves = [];
+	array = array.slice(0); //makes copy of array
 
-function insertionSort(array){
-    //arr to store all the moves
-    let moves = [];
-    array = array.slice(0);//makes copy of array
-
-    for(let i = 1; i < array.length; i++){
-        for(let j = i; j > 0; j--){
-            if(array[j] < array[j - 1]){
-                //swap
-                swapValues(j, j - 1, array);
-                moves.push([j, j - 1, true]);                
-            }
-            else{
-                moves.push([j, j - 1, false]);
-            }
-
-        }
-    }
-    return moves;
+	for (let i = 1; i < array.length; i++) {
+		for (let j = i; j > 0; j--) {
+			if (array[j] < array[j - 1]) {
+				//swap
+				swapValues(j, j - 1, array);
+				moves.push([j, j - 1, true]);
+			} else {
+				moves.push([j, j - 1, false]);
+			}
+		}
+	}
+	return moves;
 }
 
 //utility method that swaps values
-function swapValues(i, j, array){
-    
-    let temp;
-    //swap numbers
-    temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
+function swapValues(i, j, array) {
+	let temp;
+	//swap numbers
+	temp = array[i];
+	array[i] = array[j];
+	array[j] = temp;
 
-    //swap keyLinks
-    temp = keyLinks[i];
-    keyLinks[i] = keyLinks[j];
-    keyLinks[j] = temp;
+	//swap keyLinks
+	temp = keyLinks[i];
+	keyLinks[i] = keyLinks[j];
+	keyLinks[j] = temp;
 }
 
 //VIEW
@@ -235,79 +221,73 @@ const sortedColor = "purple";
 const scanColor = "red";
 const swapColor = "aqua";
 
-
 //redners array to be displayed
-function renderArray(){
+function renderArray() {
+	//first clear the container
+	$("#main-container").empty();
 
-    //first clear the container
-    $("#main-container").empty();
+	const size = numbers.length;
 
-    const size = numbers.length;
-
-    //loops through all numbers in array and display's it in the container
-    numbers.forEach((num, index) =>{
-        //TODO
-        const markup = `
-            <div class="bar" id="${index}">${size < 25 ? num : ''}</div>
+	//loops through all numbers in array and display's it in the container
+	numbers.forEach((num, index) => {
+		//TODO
+		const markup = `
+            <div class="bar" id="${index}">${size < 25 ? num : ""}</div>
         `;
 
-        //add bar to container
-        const bar = $(markup);
-        $("#main-container").append(bar);
-        
-        //bar dimentions
-        setBarDimentions(bar, num, size);
+		//add bar to container
+		const bar = $(markup);
+		$("#main-container").append(bar);
 
-    });
+		//bar dimentions
+		setBarDimentions(bar, num, size);
+	});
 }
 //sets bar dimentions based on the size of the array
 function setBarDimentions(bar, num, size) {
-    const barHeight = num * 4;
-    const barWidth = Math.floor(800 / size);
-    const margin = size > 80 ? 2 : Math.floor(150 / size);
+	const barHeight = num * 4;
+	const barWidth = Math.floor(800 / size);
+	const margin = size > 80 ? 2 : Math.floor(150 / size);
 
-    bar.css({
-        width: "" + barWidth + "px",
-        height: "" + barHeight + "px",
-        // marginRight: "" + (size < 70 ? "5px ": "0px"), 
-        marginRight: "" + margin + "px", 
-    });
-    // bar.parent().css({
-    //     justifyContent: "" + (size < 70 ? "center": "space-between")
-    // });
+	bar.css({
+		width: "" + barWidth + "px",
+		height: "" + barHeight + "px",
+		// marginRight: "" + (size < 70 ? "5px ": "0px"),
+		marginRight: "" + margin + "px",
+	});
+	// bar.parent().css({
+	//     justifyContent: "" + (size < 70 ? "center": "space-between")
+	// });
 }
 
 //sets a different color in bars that are in their final position (sorted)
-function renderFinalColor(bars){
-    keyLinks.forEach((keyLink, i) => {
-        if(bars[i].id === ''+ keyLink){
-            renderBarStyle([bars[i]], sortedColor);
-        }
-
-    });
+function renderFinalColor(bars) {
+	keyLinks.forEach((keyLink, i) => {
+		if (bars[i].id === "" + keyLink) {
+			renderBarStyle([bars[i]], sortedColor);
+		}
+	});
 }
 
 //converts the index swap values of the permanent indexes to actual indexes of the bars in the DOM
-function keyLinkToIndex(move, bars){
-    return new Promise((resolve) => {
+function keyLinkToIndex(move, bars) {
+	return new Promise((resolve) => {
+		let barIndex;
+		let InsertBehindIndex;
 
-        let barIndex;
-        let InsertBehindIndex;
-
-        for(let i = 0; i < bars.length; i++){
-            if(bars[i].id == move[0]){//look
-                barIndex = i;
-            }
-            if(bars[i].id == move[1]){
-                InsertBehindIndex = i;
-            }
-        }
-        move[0] = barIndex;
-        move[1] = InsertBehindIndex;
-        resolve(move);
-
-            
-    });
+		for (let i = 0; i < bars.length; i++) {
+			if (bars[i].id == move[0]) {
+				//look
+				barIndex = i;
+			}
+			if (bars[i].id == move[1]) {
+				InsertBehindIndex = i;
+			}
+		}
+		move[0] = barIndex;
+		move[1] = InsertBehindIndex;
+		resolve(move);
+	});
 }
 
 /*NOTE: the moves array stores all the scans and swaps done on the 
@@ -321,229 +301,248 @@ true: permanent keyLink index, false: actual index
 if moves[index][3] is true, the permanent keyLink index is converted to an actual index
 */
 //handles rendering of sorting - recursive
-async function renderSort(index, moves, bars, animationTime, startTime){
+async function renderSort(index, moves, bars, animationTime, startTime) {
+	renderFinalColor(bars);
 
-    renderFinalColor(bars);
+	//base case
+	if (index >= moves.length) {
+		//enable all inputs after sorting
+		toggleInputs(false);
+		// console.log(new Date().getTime() - startTime);
+		return;
+	}
 
-    //base case
-    if(index >= moves.length){
-        //enable all inputs after sorting
-        toggleInputs(false);
-        // console.log(new Date().getTime() - startTime);
-        return;
-    }
+	if (moves[index][3]) {
+		moves[index] = await keyLinkToIndex(moves[index], bars);
+	}
 
+	//recursive case
 
-    if(moves[index][3]){
-        moves[index] = await keyLinkToIndex(moves[index], bars);
-    }
+	//getting bars from index values out of moves
+	let bar1 = bars[moves[index][0]];
+	let bar2 = bars[moves[index][1]];
+	//converting html elements to jquery objects that can be used for animations, etc
+	bar1 = $(bar1);
+	bar2 = $(bar2);
 
-    //recursive case
+	//if true, swap
+	if (moves[index][2]) {
+		//setting css properties before animation
+		renderBarStyle([bar1, bar2], scanColor, "100", "0px");
+		//using async/await and timeout functions to achieve delay
+		setTimeout(async () => {
+			renderBarStyle([bar1, bar2], swapColor, "100", "0px");
 
-    //getting bars from index values out of moves
-    let bar1 = bars[moves[index][0]];
-    let bar2 = bars[moves[index][1]];
-    //converting html elements to jquery objects that can be used for animations, etc
-    bar1 = $(bar1);
-    bar2 = $(bar2);
+			setTimeout(async () => {
+				//awaiting animation to be over
+				if (moves[index][3]) await insertBar(bar1, bar2, animationTime);
+				else await swapBars(bar1, bar2, animationTime);
 
-    //if true, swap
-    if(moves[index][2]){
-        //setting css properties before animation
-        renderBarStyle([bar1, bar2], scanColor, "100", "0px");
-        //using async/await and timeout functions to achieve delay
-        setTimeout(async () => {
-            renderBarStyle([bar1, bar2], swapColor, "100", "0px");
-
-            setTimeout(async () => {
-                //awaiting animation to be over
-                if(moves[index][3]) await insertBar(bar1, bar2, animationTime);
-                else await swapBars(bar1, bar2, animationTime);
-
-                setTimeout(() =>{
-                    renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
-                    //recurse    
-                    renderSort(index + 1, moves, bars, animationTime, startTime);
-
-                }, animationTime);
-
-            }, animationTime);
-
-        }, animationTime);
-        
-        
-    }
-    //if false, scan
-    else{
-        renderBarStyle([bar1, bar2], scanColor, "0", "0px");
-        setTimeout(() =>{
-            renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
-            //recurse
-            renderSort(index + 1, moves, bars, animationTime, startTime);
-        }, animationTime);
-    }
+				setTimeout(() => {
+					renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
+					//recurse
+					renderSort(
+						index + 1,
+						moves,
+						bars,
+						animationTime,
+						startTime
+					);
+				}, animationTime);
+			}, animationTime);
+		}, animationTime);
+	}
+	//if false, scan
+	else {
+		renderBarStyle([bar1, bar2], scanColor, "0", "0px");
+		setTimeout(() => {
+			renderBarStyle([bar1, bar2], unsortedColor, "0", "0px");
+			//recurse
+			renderSort(index + 1, moves, bars, animationTime, startTime);
+		}, animationTime);
+	}
 }
 
 //swaps bar1 and bar2
-function swapBars(bar1, bar2, animationTime){
-    //return new promise
-    return new Promise((resolve) => {
-        bar1 = $(bar1);
-        bar2 = $(bar2);
-        //temproprary element (right sibling of bar1)
-        const sibling = bar1.next().is(bar2) ? bar1 : bar1.next();
+function swapBars(bar1, bar2, animationTime) {
+	//return new promise
+	return new Promise((resolve) => {
+		bar1 = $(bar1);
+		bar2 = $(bar2);
+		//temproprary element (right sibling of bar1)
+		const sibling = bar1.next().is(bar2) ? bar1 : bar1.next();
 
-        //swap bars and animate them---->
-        const diff = (bar1.index() - bar2.index());
+		//swap bars and animate them---->
+		const diff = bar1.index() - bar2.index();
 
-        bar1.animate({left: '-=' + (diff * bar1.outerWidth()) + 'px'}, animationTime, () =>{
-            bar1.insertBefore(bar2);
-            renderBarStyle([bar1], scanColor, "0", "0px");
-        });
+		bar1.animate(
+			{ left: "-=" + diff * bar1.outerWidth() + "px" },
+			animationTime,
+			() => {
+				bar1.insertBefore(bar2);
+				renderBarStyle([bar1], scanColor, "0", "0px");
+			}
+		);
 
-        bar2.animate({left: '+=' + (diff * bar2.outerWidth()) + 'px'}, animationTime, () =>{
-            bar2.insertBefore(sibling);
-            renderBarStyle([bar2], scanColor, "0", "0px"); 
+		bar2.animate(
+			{ left: "+=" + diff * bar2.outerWidth() + "px" },
+			animationTime,
+			() => {
+				bar2.insertBefore(sibling);
+				renderBarStyle([bar2], scanColor, "0", "0px");
 
-            //promise resolved after this code before this runs
-            resolve(true);
-        });
-    });
-    
+				//promise resolved after this code before this runs
+				resolve(true);
+			}
+		);
+	});
 }
 
 //insert bar1 before bar2
-function insertBar(bar1, bar2, animationTime){
-    return new Promise((resolve) => {
-        bar1 = $(bar1);
-        bar2 = $(bar2);
-        //insert bar and animate it---->
-        const diff = (bar1.index() - bar2.index());
+function insertBar(bar1, bar2, animationTime) {
+	return new Promise((resolve) => {
+		bar1 = $(bar1);
+		bar2 = $(bar2);
+		//insert bar and animate it---->
+		const diff = bar1.index() - bar2.index();
 
-        bar1.animate({left: '-=' + (diff * bar1.outerWidth()) + 'px'}, animationTime, () =>{
-            bar1.insertBefore(bar2);
-            renderBarStyle([bar1], scanColor, "0", "0px");
+		bar1.animate(
+			{ left: "-=" + diff * bar1.outerWidth() + "px" },
+			animationTime,
+			() => {
+				bar1.insertBefore(bar2);
+				renderBarStyle([bar1], scanColor, "0", "0px");
 
-            resolve(true);
-        });
-    });
-    
-
+				resolve(true);
+			}
+		);
+	});
 }
 
 //render bar styles(color, pos, etc)
-function renderBarStyle(bars, bgColor, zInd, posLeft){
-    bars.forEach(bar =>{
-        bar = $(bar);
-        bar.css({
-            backgroundColor: bgColor,
-            zIndex: zInd,
-            left: posLeft
-        });
-    });
+function renderBarStyle(bars, bgColor, zInd, posLeft) {
+	bars.forEach((bar) => {
+		bar = $(bar);
+		bar.css({
+			backgroundColor: bgColor,
+			zIndex: zInd,
+			left: posLeft,
+		});
+	});
 }
 
 //CONTROLLER
 
 //after page is fully loaded
-$(document).ready(function(){
-    //min, max, length - default generation
-    const min = 10;
-    const max = 150;
-    populateArray(min, max, 10);
-    renderArray();    
+$(document).ready(function () {
+	//min, max, length - default generation
+	const min = 10;
+	const max = 150;
+	populateArray(min, max, 10);
+	renderArray();
 
-    //when swap button is pressed
-    $("#sort-button").off().on("click", function(){
-        reset();
+	//when swap button is pressed
+	$("#sort-button")
+		.off()
+		.on("click", function () {
+			reset();
 
-        //getting type of algorithm and sorting array
-        let moves = [];
-        if(algorithm !== null){
-            if(algorithm === "bubble-sort-button")  moves = bubbleSort(numbers);
-            else if(algorithm === "selection-sort-button")  moves = selectionSort(numbers);
-            else if(algorithm === "insertion-sort-button")  moves = insertionSort(numbers);
-            else if(algorithm === "merge-sort-button") moves = mergeSort(numbers);
-            else if(algorithm === "quick-sort-button") moves = quickSort(numbers);
+			//getting type of algorithm and sorting array
+			let moves = [];
+			if (algorithm !== null) {
+				if (algorithm === "bubble-sort-button")
+					moves = bubbleSort(numbers);
+				else if (algorithm === "selection-sort-button")
+					moves = selectionSort(numbers);
+				else if (algorithm === "insertion-sort-button")
+					moves = insertionSort(numbers);
+				else if (algorithm === "merge-sort-button")
+					moves = mergeSort(numbers);
+				else if (algorithm === "quick-sort-button")
+					moves = quickSort(numbers);
+			} else {
+				alert("pick an algorithm");
+				return;
+			}
+			//disable all other inputs
+			toggleInputs(true);
 
-        }
-        else{
-            alert("pick an algorithm");
-            return;
-        }
-        //disable all other inputs
-        toggleInputs(true);
+			//get main container and its children - using vanialla js because jquery .children() is not working
+			const container = document.getElementById("main-container");
+			const children = container.children;
 
-        //get main container and its children - using vanialla js because jquery .children() is not working
-        const container = document.getElementById('main-container');
-        const children = container.children;
+			//animation time
+			const arrSize = numbers.length;
 
-        //animation time
-        const arrSize = numbers.length;
+			//if arr size is high, animationtime is low
+			const animationTime =
+				arrSize > 50
+					? arrSize > 100
+						? 1
+						: 10
+					: Math.floor(1500 / arrSize);
+			// const animationTime = 1;
 
-        //if arr size is high, animationtime is low
-        const animationTime = arrSize > 50 ? (arrSize > 100 ? 1 : 10) : Math.floor(1500 / arrSize);
-        // const animationTime = 1;
+			//render sort
+			let startTime = new Date().getTime();
+			renderSort(0, moves, children, animationTime, startTime);
+		});
 
-        //render sort
-        let startTime = new Date().getTime();
-        renderSort(0, moves, children, animationTime, startTime);
+	//function handles the selection of algorithm type
+	let algorithm = null;
+	$("div.alg-select-button").click(function () {
+		//toggles class so the button clicked can be styled
+		$("div.alg-select-button-active").removeClass(
+			"alg-select-button-active"
+		);
+		$(this).toggleClass("alg-select-button-active");
+		//getting id of selected element
+		algorithm = $(this).attr("id");
+	});
 
-    });
+	//array size input handler - fired when input is changed
+	$("#array-size-input").on("input change", function () {
+		//everytime the input is changed, a new array is generated
+		const size = parseInt($(this).val());
+		populateArray(min, max, size);
+		renderArray();
 
-    //function handles the selection of algorithm type
-    let algorithm = null;
-    $("div.alg-select-button").click(function(){
-        //toggles class so the button clicked can be styled
-        $("div.alg-select-button-active").removeClass("alg-select-button-active");
-        $(this).toggleClass("alg-select-button-active");
-        //getting id of selected element
-        algorithm = $(this).attr("id");
-    });
+		//also display array size on UI
+		$("#array-size-label").text("Array Size (" + size + ")");
+	});
 
-    //array size input handler - fired when input is changed
-    $("#array-size-input").on("input change", function(){
-        //everytime the input is changed, a new array is generated
-        const size = parseInt($(this).val());
-        populateArray(min, max, size);
-        renderArray();
-
-        //also display array size on UI
-        $("#array-size-label").text("Array Size (" + size + ")");
-        
-    });
-
-    //generate arr button handler
-    $("#generate-arr-button").click(function(){
-        const size = parseInt($("#array-size-input").val());
-        populateArray(min, max, size);
-        renderArray();
-
-    });
-    
-
+	//generate arr button handler
+	$("#generate-arr-button").click(function () {
+		const size = parseInt($("#array-size-input").val());
+		populateArray(min, max, size);
+		renderArray();
+	});
 });
 
 //disables and enables inputs
-function toggleInputs(disabled){
-    //array on inputs
-    const inputs = [$("#generate-arr-button"), $("#sort-button"), $("#array-size-input"), $("div.alg-select-button")];
-    
-    inputs.forEach(input => {
-        input.attr("disabled", disabled)
-            //diables hover an active css effects
-            .css("pointer-events", disabled ? "none" : "all");
-    });
+function toggleInputs(disabled) {
+	//array on inputs
+	const inputs = [
+		$("#generate-arr-button"),
+		$("#sort-button"),
+		$("#array-size-input"),
+		$("div.alg-select-button"),
+	];
 
+	inputs.forEach((input) => {
+		input
+			.attr("disabled", disabled)
+			//diables hover an active css effects
+			.css("pointer-events", disabled ? "none" : "all");
+	});
 }
 //resets the page for new sort
-function reset(){
-    //resets keylinks
-    keyLinks = [];
-    for(let i = 0; i < numbers.length; i++){
-        keyLinks.push(i);
-    }
+function reset() {
+	//resets keylinks
+	keyLinks = [];
+	for (let i = 0; i < numbers.length; i++) {
+		keyLinks.push(i);
+	}
 
-    renderArray();
-
+	renderArray();
 }
