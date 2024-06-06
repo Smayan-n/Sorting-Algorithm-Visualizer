@@ -186,7 +186,7 @@ function insertionSort(array) {
 	array = array.slice(0); //makes copy of array
 
 	for (let i = 1; i < array.length; i++) {
-		for (let j = i; j > 0; j--) {
+		for (let j = i; j > 0 && array[j] < array[j - 1]; j--) {
 			if (array[j] < array[j - 1]) {
 				//swap
 				swapValues(j, j - 1, array);
