@@ -7,4 +7,5 @@ the 5 algorithms featured are:
 4. merge sort
 5. quick sort
 
+
 Take a look at the live site here: https://smayan-n.github.io/Sorting-Algorithm-Visualizer/
