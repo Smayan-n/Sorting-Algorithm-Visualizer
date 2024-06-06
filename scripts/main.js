@@ -186,13 +186,15 @@ function insertionSort(array) {
 	array = array.slice(0); //makes copy of array
 
 	for (let i = 1; i < array.length; i++) {
-		for (let j = i; j > 0 && array[j] < array[j - 1]; j--) {
+		for (let j = i; j > 0; j--) {
 			if (array[j] < array[j - 1]) {
 				//swap
 				swapValues(j, j - 1, array);
 				moves.push([j, j - 1, true]);
 			} else {
 				moves.push([j, j - 1, false]);
+				//early termination
+				break;
 			}
 		}
 	}
